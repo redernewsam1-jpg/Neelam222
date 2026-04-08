@@ -5,28 +5,30 @@ const fs = require("fs");
 const FormData = require("form-data");
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 
 const PORT = process.env.PORT || 3000;
 const BOT_TOKEN = process.env.BOT_TOKEN;
 
-// ✅ Home Route
+// ✅ Home
 app.get("/", (req, res) => {
   res.json({
     status: "running",
-    message: "🔥 PRO API + TELEGRAM BOT RUNNING"
+    message: "🔥 BOT + API WORKING"
   });
 });
 
-// 🔥 COMMON FUNCTION (download + send)
+// 🔥 DOWNLOAD + SEND FUNCTION
 function downloadAndSend(videoUrl, userId) {
   return new Promise((resolve, reject) => {
     const fileName = "video.mp4";
     const command = `./yt-dlp -f best -o ${fileName} "${videoUrl}"`;
 
+    console.log("Downloading:", videoUrl);
+
     exec(command, async (error, stdout, stderr) => {
       if (error) {
-        console.log(stderr);
+        console.log("Download error:", stderr);
         return reject("Download failed");
       }
 
@@ -45,13 +47,14 @@ function downloadAndSend(videoUrl, userId) {
         resolve("Video sent");
 
       } catch (err) {
+        console.log("Telegram error:", err.message);
         reject("Telegram send failed");
       }
     });
   });
 }
 
-// ✅ MAIN API (same as before)
+// ✅ API (manual use)
 app.get("/Saini_bots", async (req, res) => {
   const videoUrl = req.query.url;
   const userId = req.query.user_id;
@@ -68,26 +71,33 @@ app.get("/Saini_bots", async (req, res) => {
   }
 });
 
-// 🤖 TELEGRAM WEBHOOK (FIXED 🔥)
+// 🤖 TELEGRAM WEBHOOK (FINAL FIXED)
 app.post("/webhook", async (req, res) => {
+
+  console.log("🔥 Webhook hit:", JSON.stringify(req.body));
+
+  // ⚡ instant response (VERY IMPORTANT)
+  res.sendStatus(200);
+
   try {
     const message = req.body.message;
-    if (!message) return res.sendStatus(200);
+    if (!message) return;
 
     const chatId = message.chat.id;
     const text = message.text;
 
-    // 👉 /start command
+    // 👉 /start
     if (text === "/start") {
       await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         chat_id: chatId,
         text: "👋 Send video link (m3u8/mp4)\nI will download & send 🎬"
       });
-      return res.sendStatus(200);
+      return;
     }
 
-    // 👉 Link received
+    // 👉 link
     if (text && text.startsWith("http")) {
+
       await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         chat_id: chatId,
         text: "⏳ Downloading..."
@@ -109,14 +119,12 @@ app.post("/webhook", async (req, res) => {
       }
     }
 
-    res.sendStatus(200);
-
   } catch (err) {
-    res.sendStatus(500);
+    console.log("Webhook error:", err.message);
   }
 });
 
-// 🚀 Start server
+// 🚀 Start
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
