@@ -18,11 +18,13 @@ app.get("/", (req, res) => {
   });
 });
 
-// 🔥 DOWNLOAD + SEND FUNCTION
+// 🔥 DOWNLOAD + SEND FUNCTION (UPDATED)
 function downloadAndSend(videoUrl, userId) {
   return new Promise((resolve, reject) => {
     const fileName = "video.mp4";
-    const command = `./yt-dlp -f best -o ${fileName} "${videoUrl}"`;
+
+    // 🔥 FIXED yt-dlp COMMAND (m3u8 support)
+    const command = `./yt-dlp -o ${fileName} --no-check-certificate --add-header "Referer: https://classplusapp.com/" --add-header "User-Agent: Mozilla/5.0" "${videoUrl}"`;
 
     console.log("Downloading:", videoUrl);
 
@@ -54,7 +56,7 @@ function downloadAndSend(videoUrl, userId) {
   });
 }
 
-// ✅ API (manual use)
+// ✅ API
 app.get("/Saini_bots", async (req, res) => {
   const videoUrl = req.query.url;
   const userId = req.query.user_id;
@@ -71,13 +73,12 @@ app.get("/Saini_bots", async (req, res) => {
   }
 });
 
-// 🤖 TELEGRAM WEBHOOK (FINAL FIXED)
+// 🤖 WEBHOOK
 app.post("/webhook", async (req, res) => {
 
   console.log("🔥 Webhook hit:", JSON.stringify(req.body));
 
-  // ⚡ instant response (VERY IMPORTANT)
-  res.sendStatus(200);
+  res.sendStatus(200); // ⚡ instant reply
 
   try {
     const message = req.body.message;
@@ -86,7 +87,6 @@ app.post("/webhook", async (req, res) => {
     const chatId = message.chat.id;
     const text = message.text;
 
-    // 👉 /start
     if (text === "/start") {
       await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         chat_id: chatId,
@@ -95,7 +95,6 @@ app.post("/webhook", async (req, res) => {
       return;
     }
 
-    // 👉 link
     if (text && text.startsWith("http")) {
 
       await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
