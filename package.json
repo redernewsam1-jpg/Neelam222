@@ -1,7 +1,7 @@
 {
-  "name": "pro-api-bot",
+  "name": "ultra-pro-telegram-bot",
   "version": "1.0.0",
-  "description": "Telegram Bot + Video Downloader API",
+  "description": "Telegram bot for downloading videos using yt-dlp",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
