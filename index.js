@@ -14,17 +14,21 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 app.get("/", (req, res) => {
   res.json({
     status: "running",
-    message: "🔥 BOT + API WORKING"
+    message: "🔥 ULTRA PRO BOT RUNNING"
   });
 });
 
-// 🔥 DOWNLOAD + SEND FUNCTION (UPDATED)
+// 🔥 DOWNLOAD + SEND (ULTRA PRO)
 function downloadAndSend(videoUrl, userId) {
   return new Promise((resolve, reject) => {
     const fileName = "video.mp4";
 
-    // 🔥 FIXED yt-dlp COMMAND (m3u8 support)
-    const command = `./yt-dlp -o ${fileName} --no-check-certificate --add-header "Referer: https://classplusapp.com/" --add-header "User-Agent: Mozilla/5.0" "${videoUrl}"`;
+    const command = `./yt-dlp -o ${fileName} \
+--cookies cookies.txt \
+--hls-prefer-ffmpeg \
+--add-header "Referer: https://classplusapp.com/" \
+--add-header "User-Agent: Mozilla/5.0" \
+"${videoUrl}"`;
 
     console.log("Downloading:", videoUrl);
 
@@ -56,7 +60,7 @@ function downloadAndSend(videoUrl, userId) {
   });
 }
 
-// ✅ API
+// ✅ API (optional use)
 app.get("/Saini_bots", async (req, res) => {
   const videoUrl = req.query.url;
   const userId = req.query.user_id;
@@ -73,7 +77,7 @@ app.get("/Saini_bots", async (req, res) => {
   }
 });
 
-// 🤖 WEBHOOK
+// 🤖 TELEGRAM WEBHOOK
 app.post("/webhook", async (req, res) => {
 
   console.log("🔥 Webhook hit:", JSON.stringify(req.body));
@@ -87,14 +91,16 @@ app.post("/webhook", async (req, res) => {
     const chatId = message.chat.id;
     const text = message.text;
 
+    // 👉 /start
     if (text === "/start") {
       await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         chat_id: chatId,
-        text: "👋 Send video link (m3u8/mp4)\nI will download & send 🎬"
+        text: "👋 Send video link (Classplus/m3u8/mp4)\nI will download & send 🎬"
       });
       return;
     }
 
+    // 👉 link receive
     if (text && text.startsWith("http")) {
 
       await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
